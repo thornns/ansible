@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Dive Into Ansible</title>
+</head>
+<body>
+
+	<h1> Template 01 - Através do Ansible
+	<p> {{ ansible_managed }} </p>
+	
+	<a href="playbook_stacker">
+	<img src="
+                              {%- if ansible_distribution == 'CentOS' -%}
+                              {{ centos_logo }}
+                              {%- elif ansible_distribution == 'Ubuntu' -%}
+                              {{ ubuntu_logo }}
+                              {%- endif %}
+        " width="300" height="300">
+        </a>
+
+</body>
+</html>
