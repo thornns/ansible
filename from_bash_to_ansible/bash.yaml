@@ -1,0 +1,150 @@
+---
+-
+  hosts: ubuntu
+
+  vars:
+    polkit: |
+      polkit.addRule(function(action, subject) {
+       if ((action.id == "org.freedesktop.color-manager.create-device" ||
+       action.id == "org.freedesktop.color-manager.create-profile" ||
+       action.id == "org.freedesktop.color-manager.delete-device" ||
+       action.id == "org.freedesktop.color-manager.delete-profile" ||
+       action.id == "org.freedesktop.color-manager.modify-device" ||
+       action.id == "org.freedesktop.color-manager.modify-profile") &&
+       subject.isInGroup("{users}")) {
+       return polkit.Result.YES;
+       }
+       });
+
+    proxy: |
+      [Unit]
+      Description="###########"
+      After=network.target
+      Requires=network.target
+      [Service]
+      User=#################
+      ExecStart=##############-proxy --daemon
+      StandardError=syslog
+      SyslogIdentifier=########_PROXY
+      [Install]
+      WantedBy=graphical.target
+
+    xfce4_login_manager_package: lightdm
+    xfce4_login_manager_service: lightdm
+    xfce4_packages:
+      - xserver-xorg
+      - xfonts-base
+      - xubuntu-desktop
+  
+  tasks:
+    - name: Instalar GNUPG
+      package:
+        name: gnupg
+        state: latest
+
+    - name: Adicionar a chave APT
+      apt_key:
+        url: https://dl.google.com/linux/linux_signing_key.pub
+        state: present
+        
+    - name: Adicionar o repositório
+      apt_repository:
+        repo: deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+        state: present
+        filename: google-chrome
+        update_cache: True
+
+    - name: Instalar Pacotes
+      package:
+        name:
+          - google-chrome-stable
+          - nodejs
+          - npm
+          - curl
+          - vim
+          - wget
+          - git
+          - unrar
+          - unzip
+          - xrdp
+          - dconf-editor
+          - alacarte
+          - snapd
+        state: latest
+        update_cache: True
+
+    - name: Instalar XFCE4
+      apt:
+        name: "{{ item }}"
+      with_items:
+        - "{{ xfce4_packages }}"
+        - "{{ xfce4_login_manager_package }}"
+
+    - name: Iniciar SNAP
+      service:
+        name: snapd
+        state: started
+
+    - name: Ativar SNAP
+      service:
+        name: snapd
+        enabled: yes
+
+    - name: Instalar ark
+       snap:
+        name: ark
+        classic: no
+
+    - name: Instalar PROXY
+      npm:
+        name: "PROXY"
+        global: yes
+        state: latest
+
+    - name: Instalar GERENCIADOR
+      npm:
+        name: GERENCIADOR
+        global: yes
+        state: latest
+
+    - name: Criação do Usuário
+      command: "{{ item }}"
+      with_items:
+        - /usr/sbin/useradd -m -s /bin/bash ##################
+        - /usr/bin/echo ##################:##################### | chpasswd
+        - /usr/sbin/usermod -aG sudo ####################
+
+    - name: Configuração XRDP
+      command: "{{ item }}"
+      with_items:
+        - sed -i 's/crypt_level=high/crypt_level=low/g' /etc/xrdp/xrdp.ini
+        - sed -i 's/max_bpp=32/max_bpp=128/g' /etc/xrdp/xrdp.ini
+        - echo "xserverbpp=128" >> /etc/xrdp/xrdp.ini
+        - echo "use_compression=yes" >> /etc/xrdp/xrdp.ini
+        - sed -i 's/test -x/#test -x/g' /etc/xrdp/startwm.sh
+        - sed -i 's/exec/#exec/g' /etc/xrdp/startwm.sh
+        
+    - name: Inserir startxfce4 ao fim do arquivo /etc/xrdp/startwm.sh
+      lineinfile:
+        path: /etc/xrdp/startwm.sh
+        line: startxfce4
+
+    - copy:
+        dest: /etc/polkit-1/localauthority.conf.d/02-allow-colord.conf
+        content: "{{ polkit }}"
+
+    - copy:
+        dest: /etc/systemd/system/################.service
+        content: "{{ proxy }}"
+
+    - name: Habilitando o Ambiente Gráfico
+      command: systemctl set-default graphical.target
+
+    - name: Ajustes finais
+      command: "{{ item }}"
+      with_items:
+        - systemctl enable xrdp
+        - systemctl daemon-reload
+        - systemctl enable ################.service
+
+...
