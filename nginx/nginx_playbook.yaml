@@ -31,7 +31,12 @@
       package:
         name: nginx
         state: latest
-    
+        
+    - name: Enable NGINX
+      service:
+        name: nginx
+        enabled: yes
+        
     - name: Template HTML
       template:
         src: index.html-base.j2
