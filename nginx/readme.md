@@ -1,4 +1,4 @@
-# Instalação do NGINX
+# Instalação e customização do NGINX em 6 hosts, através um Playbook
 ### Instalação Ubuntu e CentOS
 - Criação de um playbook para instalação do NGINX em hosts Ubuntu e Centos através de uma única task (com exemplo de tasks separadas)
 - Edição do arquivo index.html por um customizado
