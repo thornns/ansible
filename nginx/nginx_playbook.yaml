@@ -1,0 +1,64 @@
+---
+-
+  hosts: linux
+  
+  vars_files:
+    - vars/logos.yaml
+    
+  tasks:
+    - name: Instalação do EPEL
+      yum:
+        name: epel-release
+        update_cache: yes
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+#    - name: Instalação do NGINX - CentOS
+#      yum:
+#        name: nginx
+#        update_cache: yes
+#        state: latest
+#      when: ansible_distribution == "CentOS"
+    
+#    - name: Instalaão do NGINX - Ubuntu
+#      apt:
+#        name: nginx
+#        update_cache: yes
+#        state: latest
+#      when: ansible_distribution == "Ubuntu"
+
+    - name: Instalação NGINX - Qualquer Distro
+      package:
+        name: nginx
+        state: latest
+    
+    - name: Template HTML
+      template:
+        src: index.html-base.j2
+        dest: "{{ nginx_root_location }}/index.html"
+        mode: 0644
+
+    - name: Reiniciar NGINX
+      service:
+        name: nginx
+        state: restarted # failed, running, stopped
+      notify: Check HTTP
+
+    - name: Instalação Unzip
+      package:
+        name: unzip
+        state: latest
+
+    - name: Dezipar
+      unarchive:
+        src: playbook_stacker.zip
+        dest: "{{ nginx_root_location }}"
+        mode: 0755
+
+  handlers:
+    - name: Check HTTP
+      uri:
+        url: http://{{ ansible_default_ipv4.address }}
+        status_code: 200
+      
+...
