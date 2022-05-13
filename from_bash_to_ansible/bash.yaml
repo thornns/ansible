@@ -16,25 +16,18 @@
        }
        });
 
-    proxy: |
+    luminati: |
       [Unit]
-      Description="###########"
+      Description="Serviço Luminati Proxy"
       After=network.target
       Requires=network.target
       [Service]
-      User=#################
-      ExecStart=##############-proxy --daemon
+      User=teste
+      ExecStart=luminati-proxy --daemon
       StandardError=syslog
-      SyslogIdentifier=########_PROXY
+      SyslogIdentifier=LUMINATI_PROXY
       [Install]
       WantedBy=graphical.target
-
-    xfce4_login_manager_package: lightdm
-    xfce4_login_manager_service: lightdm
-    xfce4_packages:
-      - xserver-xorg
-      - xfonts-base
-      - xubuntu-desktop
   
   tasks:
     - name: Instalar GNUPG
@@ -54,31 +47,15 @@
         filename: google-chrome
         update_cache: True
 
-    - name: Instalar Pacotes
+    - name: Instalar Pacotes Chrome, NodeJS, NPM, Curl, VIM, Wget, GIT, Unrar, Unzip, Xrdp, Dconf-editor, Alacarte, Snapd
       package:
-        name:
-          - google-chrome-stable
-          - nodejs
-          - npm
-          - curl
-          - vim
-          - wget
-          - git
-          - unrar
-          - unzip
-          - xrdp
-          - dconf-editor
-          - alacarte
-          - snapd
+        name: ['google-chrome-stable', 'nodejs', 'npm', 'curl', 'vim', 'wget', 'git', 'unrar', 'unzip', 'xrdp', 'dconf-editor', 'alacarte', 'snapd']
         state: latest
         update_cache: True
 
     - name: Instalar XFCE4
       apt:
-        name: "{{ item }}"
-      with_items:
-        - "{{ xfce4_packages }}"
-        - "{{ xfce4_login_manager_package }}"
+        name: [ 'xserver-xorg', 'xfonts-base', 'xubuntu-desktop', 'lightdm' ]
 
     - name: Iniciar SNAP
       service:
@@ -91,40 +68,40 @@
         enabled: yes
 
     - name: Instalar ark
-       snap:
+      snap:
         name: ark
         classic: no
 
-    - name: Instalar PROXY
+    - name: Instalar luminati-io
       npm:
-        name: "PROXY"
+        name: "@luminati-io/luminati-proxy"
         global: yes
         state: latest
 
-    - name: Instalar GERENCIADOR
+    - name: Instalar pm2
       npm:
-        name: GERENCIADOR
+        name: pm2
         global: yes
         state: latest
 
     - name: Criação do Usuário
-      command: "{{ item }}"
-      with_items:
-        - /usr/sbin/useradd -m -s /bin/bash ##################
-        - /usr/bin/echo ##################:##################### | chpasswd
-        - /usr/sbin/usermod -aG sudo ####################
+      user:
+        name: teste
+        password: "{{ '1234' | password_hash('sha512') }}"
+        state: present
+        shell: "/bin/bash"
+        groups: sudo
+        append: yes
 
     - name: Configuração XRDP
       command: "{{ item }}"
       with_items:
         - sed -i 's/crypt_level=high/crypt_level=low/g' /etc/xrdp/xrdp.ini
         - sed -i 's/max_bpp=32/max_bpp=128/g' /etc/xrdp/xrdp.ini
-        - echo "xserverbpp=128" >> /etc/xrdp/xrdp.ini
-        - echo "use_compression=yes" >> /etc/xrdp/xrdp.ini
         - sed -i 's/test -x/#test -x/g' /etc/xrdp/startwm.sh
         - sed -i 's/exec/#exec/g' /etc/xrdp/startwm.sh
         
-    - name: Inserir startxfce4 ao fim do arquivo /etc/xrdp/startwm.sh
+    - name: Inserir startxfce ao fim do arquivo /etc/xrdp/startwm.sh
       lineinfile:
         path: /etc/xrdp/startwm.sh
         line: startxfce4
@@ -134,17 +111,37 @@
         content: "{{ polkit }}"
 
     - copy:
-        dest: /etc/systemd/system/################.service
-        content: "{{ proxy }}"
+        dest: /etc/systemd/system/luminati.service
+        content: "{{ luminati }}"
 
     - name: Habilitando o Ambiente Gráfico
       command: systemctl set-default graphical.target
 
-    - name: Ajustes finais
-      command: "{{ item }}"
-      with_items:
-        - systemctl enable xrdp
-        - systemctl daemon-reload
-        - systemctl enable ################.service
+    - name: Daemon Reload
+      command: systemctl daemon-reload
+
+    - name: Desativar AppArmor
+      service:
+        name: apparmor
+        state: stopped
+        enabled: no
+
+    - name: Desativar UFW
+      service:
+        name: ufw
+        state: stopped
+        enabled: no
+
+    - name: Ativar Serviços
+      service:
+        name: xrdp
+        state: started
+        enabled: yes
+
+    - name: Ativar Serviços
+      service:
+        name: luminati
+        state: started
+        enabled: yes
 
 ...
