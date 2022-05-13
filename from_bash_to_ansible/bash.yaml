@@ -103,14 +103,13 @@
       replace:
         path: /etc/xrdp/xrdp.ini
         regexp:  '^max_bpp=32$'
-        replace: 'max_bpp=128'      
-
+        replace: 'max_bpp=128'
 
     - name: Ajuste startwm.sh 01 (XRDP)
       replace:
         path: /etc/xrdp/startwm.sh
         regexp:  '^test -x'
-        replace: '#test -x'      
+        replace: '#test -x'
 
     - name: Ajuste startwm.sh 02 (XRDP)
       replace:
