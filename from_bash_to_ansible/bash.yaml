@@ -93,13 +93,30 @@
         groups: sudo
         append: yes
 
-    - name: Configuração XRDP
-      command: "{{ item }}"
-      with_items:
-        - sed -i 's/crypt_level=high/crypt_level=low/g' /etc/xrdp/xrdp.ini
-        - sed -i 's/max_bpp=32/max_bpp=128/g' /etc/xrdp/xrdp.ini
-        - sed -i 's/test -x/#test -x/g' /etc/xrdp/startwm.sh
-        - sed -i 's/exec/#exec/g' /etc/xrdp/startwm.sh
+    - name: Ajuste de criptografia (XRDP)
+      replace:
+        path: /etc/xrdp/xrdp.ini
+        regexp:  '^crypt_level=high$'
+        replace: 'crypt_level=low'
+
+    - name: Ajuste de BPP (XRDP)
+      replace:
+        path: /etc/xrdp/xrdp.ini
+        regexp:  '^max_bpp=32$'
+        replace: 'max_bpp=128'      
+
+
+    - name: Ajuste startwm.sh 01 (XRDP)
+      replace:
+        path: /etc/xrdp/startwm.sh
+        regexp:  '^test -x'
+        replace: '#test -x'      
+
+    - name: Ajuste startwm.sh 02 (XRDP)
+      replace:
+        path: /etc/xrdp/startwm.sh
+        regexp:  '^exec'
+        replace: '#exec'
         
     - name: Inserir startxfce ao fim do arquivo /etc/xrdp/startwm.sh
       lineinfile:
