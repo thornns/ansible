@@ -118,7 +118,8 @@
       command: systemctl set-default graphical.target
 
     - name: Daemon Reload
-      command: systemctl daemon-reload
+      systemd:
+        daemon_reload: yes
 
     - name: Desativar AppArmor
       service:
