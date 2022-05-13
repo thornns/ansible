@@ -132,13 +132,13 @@
         state: stopped
         enabled: no
 
-    - name: Ativar Serviços
+    - name: Ativar XRDP
       service:
         name: xrdp
         state: started
         enabled: yes
 
-    - name: Ativar Serviços
+    - name: Ativar Luminati
       service:
         name: luminati
         state: started
