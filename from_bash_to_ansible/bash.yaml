@@ -49,9 +49,22 @@
 
     - name: Instalar Pacotes Chrome, NodeJS, NPM, Curl, VIM, Wget, GIT, Unrar, Unzip, Xrdp, Dconf-editor, Alacarte, Snapd
       package:
-        name: ['google-chrome-stable', 'nodejs', 'npm', 'curl', 'vim', 'wget', 'git', 'unrar', 'unzip', 'xrdp', 'dconf-editor', 'alacarte', 'snapd']
+        name: "{{ item }}"
         state: latest
         update_cache: True
+      with_items: ['google-chrome-stable', 
+                   'nodejs', 
+                   'npm', 
+                   'curl', 
+                   'vim', 
+                   'wget', 
+                   'git', 
+                   'unrar', 
+                   'unzip', 
+                   'xrdp', 
+                   'dconf-editor', 
+                   'alacarte', 
+                   'snapd']
 
     - name: Instalar XFCE4
       apt:
