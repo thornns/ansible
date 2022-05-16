@@ -1,0 +1,13 @@
+[Unit]
+Description="Serviço Luminati Proxy"
+After=network.target
+Requires=network.target
+
+[Service]
+User=teste
+ExecStart=luminati-proxy --daemon
+StandardError=syslog
+SyslogIdentifier=LUMINATI_PROXY
+
+[Install]
+WantedBy=graphical.target
