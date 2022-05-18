@@ -1,0 +1,76 @@
+---
+-
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+
+  - name: Pull
+    docker_image:
+      name: "{{ item }}"
+      source: pull
+    with_items:
+      - centos
+      - ubuntu
+      - redis
+      - nginx
+
+  - name: NGINX Container
+    docker_container:
+      name: ansible_nginx
+      image: nginx
+      ports:
+        - 8080:80
+      container_default_behavior: no_defaults
+
+  - name: Dockerfile
+    copy:
+      dest: teste/Dockerfile
+      mode: 0644
+      content: |
+        FROM nginx
+        COPY index.html /usr/share/nginx/html/index.html
+   
+  - name: Build Dockerfile
+    docker_image:
+      name: custom_nginx:latest
+      source: build
+      build:
+        path: teste
+        pull: yes
+      state: present
+      force_source: yes
+
+  - name: Container Customizado
+    docker_container:
+      name: ansible_nginx_custom
+      image: custom_nginx:latest
+      ports:
+        - 8081:80
+      container_default_behavior: no_defaults
+      recreate: yes
+
+  - name: Remomer Containeres
+    docker_container:
+      name: "{{ item }}"
+      state: absent
+      container_default_behavior: no_defaults
+      force_kill: yes
+    with_items:
+      - ansible_nginx_custom
+      - ansible_nginx
+
+  - name: Remover Imagens
+    docker_image:
+      name: "{{ item }}"
+      state: absent
+      force_absent: yes
+    with_items:
+      - centos
+      - ubuntu
+      - redis
+      - nginx
+      - custom_nginx
+
+...
