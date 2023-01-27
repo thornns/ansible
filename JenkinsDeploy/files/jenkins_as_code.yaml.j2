@@ -1,0 +1,328 @@
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - usernamePassword:
+          id: ""
+          password: ""
+          scope: GLOBAL
+          username: ""
+      - string:
+          id: ""
+          scope: GLOBAL
+          secret: ""
+jenkins:
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    projectMatrix:
+      permissions:
+      - "GROUP:Job/Build:"
+      - "GROUP:Job/Cancel:"
+      - "GROUP:Job/Configure:"
+      - "GROUP:Job/Create:"
+      - "GROUP:Job/Read:"
+      - "GROUP:Job/Workspace:"
+      - "GROUP:Overall/Administer:"
+      - "GROUP:Overall/Read:"
+      - "GROUP:Run/Update:"
+      - "GROUP:View/Configure:"
+      - "GROUP:View/Create:"
+      - "GROUP:View/Delete:"
+      - "GROUP:View/Read:"
+      - "USER:Overall/Administer:admin"
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  disableRememberMe: false
+  disabledAdministrativeMonitors:
+  - "jenkins.monitor.JavaVersionRecommendationAdminMonitor-2"
+  - "jenkins.diagnostics.RootUrlNotSetMonitor"
+  - "jenkins.model.BuiltInNodeMigration"
+  - "jenkins.diagnostics.ControllerExecutorsAgents"
+  labelAtoms:
+  - name: "main"
+  - name: "dev"
+  - name: "test"
+  - name: "production"
+  labelString: "main"
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  nodes:
+  - permanent:
+      launcher:
+        jnlp:
+          workDirSettings:
+            disabled: true
+            failIfWorkDirIsMissing: false
+            internalDir: "remoting"
+      name: "dev"
+      numExecutors: 3
+      remoteFS: "/home/jenkins/agent"
+      retentionStrategy: "always"
+  - permanent:
+      launcher:
+        jnlp:
+          workDirSettings:
+            disabled: true
+            failIfWorkDirIsMissing: false
+            internalDir: "remoting"
+      name: "test"
+      numExecutors: 3
+      remoteFS: "/home/jenkins/agent"
+      retentionStrategy: "always"
+  - permanent:
+      launcher:
+        jnlp:
+          workDirSettings:
+            disabled: true
+            failIfWorkDirIsMissing: false
+            internalDir: "remoting"
+      name: "production"
+      numExecutors: 3
+      remoteFS: "/home/jenkins/agent"
+      retentionStrategy: "always"
+  numExecutors: 3
+  primaryView:
+    all:
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  securityRealm:
+    activeDirectory:
+      customDomain: true
+      domains:
+      - bindName: "DOMAIN\\USERNAME"
+        bindPassword: ""
+        name: "domain-full-qualified.name"
+        servers: "active_directory_server_name:389"
+        tlsConfiguration: TRUST_ALL_CERTIFICATES
+      groupLookupStrategy: TOKENGROUPS
+      internalUsersDatabase:
+        jenkinsInternalUser: "admin"
+      removeIrrelevantGroups: true
+      requireTLS: false
+      startTls: true
+  slaveAgentPort: 50000
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+globalCredentialsConfiguration:
+  configuration:
+    providerFilter: "none"
+    typeFilter: "none"
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  copyartifact:
+    mode: PRODUCTION
+  gitHooks:
+    allowedOnAgents: false
+    allowedOnController: false
+  gitHostKeyVerificationConfiguration:
+    sshHostKeyVerificationStrategy: "knownHostsFileVerificationStrategy"
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: true
+  sSHD:
+    port: -1
+  scriptApproval:
+    approvedScriptHashes:
+    - ""
+  updateSiteWarningsConfiguration:
+    ignoredWarnings:
+    - ""
+unclassified:
+  ansiColorBuildWrapper:
+    colorMaps:
+    - black: "#000000"
+      blackB: "#4C4C4C"
+      blue: "#1E90FF"
+      blueB: "#4682B4"
+      cyan: "#00CDCD"
+      cyanB: "#00FFFF"
+      green: "#00CD00"
+      greenB: "#00FF00"
+      magenta: "#CD00CD"
+      magentaB: "#FF00FF"
+      name: "xterm"
+      red: "#CD0000"
+      redB: "#FF0000"
+      white: "#E5E5E5"
+      whiteB: "#FFFFFF"
+      yellow: "#CDCD00"
+      yellowB: "#FFFF00"
+    - black: "#000000"
+      blackB: "#555555"
+      blue: "#0000AA"
+      blueB: "#5555FF"
+      cyan: "#00AAAA"
+      cyanB: "#55FFFF"
+      defaultBackground: 0
+      defaultForeground: 7
+      green: "#00AA00"
+      greenB: "#55FF55"
+      magenta: "#AA00AA"
+      magentaB: "#FF55FF"
+      name: "vga"
+      red: "#AA0000"
+      redB: "#FF5555"
+      white: "#AAAAAA"
+      whiteB: "#FFFFFF"
+      yellow: "#AA5500"
+      yellowB: "#FFFF55"
+    - black: "black"
+      blackB: "black"
+      blue: "blue"
+      blueB: "blue"
+      cyan: "cyan"
+      cyanB: "cyan"
+      green: "green"
+      greenB: "green"
+      magenta: "magenta"
+      magentaB: "magenta"
+      name: "css"
+      red: "red"
+      redB: "red"
+      white: "white"
+      whiteB: "white"
+      yellow: "yellow"
+      yellowB: "yellow"
+    - black: "#2E3436"
+      blackB: "#2E3436"
+      blue: "#3465A4"
+      blueB: "#3465A4"
+      cyan: "#06989A"
+      cyanB: "#06989A"
+      defaultBackground: 0
+      defaultForeground: 7
+      green: "#4E9A06"
+      greenB: "#4E9A06"
+      magenta: "#75507B"
+      magentaB: "#75507B"
+      name: "gnome-terminal"
+      red: "#CC0000"
+      redB: "#CC0000"
+      white: "#D3D7CF"
+      whiteB: "#D3D7CF"
+      yellow: "#C4A000"
+      yellowB: "#C4A000"
+  artifactoryBuilder:
+    jfrogPipelinesServer:
+      bypassProxy: false
+      connectionRetries: 3
+      credentialsConfig:
+        ignoreCredentialPluginDisabled: true
+        overridingCredentials: false
+        password: ""
+        username: ""
+      timeout: 300
+    useCredentialsPlugin: false
+  bitbucketEndpointConfiguration:
+    endpoints:
+    - bitbucketCloudEndpoint:
+        enableCache: false
+        manageHooks: false
+        repositoriesCacheDuration: 0
+        teamCacheDuration: 0
+    - bitbucketServerEndpoint:
+        callChanges: false
+        credentialsId: ""
+        displayName: "Bitbucket"
+        manageHooks: true
+        serverUrl: "https://.com"
+  buildDiscarders:
+    configuredBuildDiscarders:
+    - "jobBuildDiscarder"
+  email-ext:
+    adminRequiredForTemplateTesting: false
+    allowUnregisteredEnabled: false
+    charset: "UTF-8"
+    debugMode: false
+    defaultBody: |-
+      $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+      Check console output at $BUILD_URL to view the results.
+    defaultContentType: "text/plain"
+    defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+    defaultTriggerIds:
+    - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
+    maxAttachmentSize: -1
+    maxAttachmentSizeMb: -1
+    precedenceBulk: false
+    watchingEnabled: false
+  fingerprints:
+    fingerprintCleanupDisabled: false
+    storage: "file"
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+  gitHubPluginConfig:
+    hookUrl: "http://{{ jenkins_host_name }}/github-webhook/"
+  gitSCM:
+    addGitTagAction: false
+    allowSecondFetch: false
+    createAccountBasedOnEmail: false
+    disableGitToolChooser: false
+    hideCredentials: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  globalLibraries:
+  injectionConfig:
+    allowUntrusted: false
+    enabled: false
+    injectCcudExtension: false
+    injectMavenExtension: false
+  junitTestResultStorage:
+    storage: "file"
+  location:
+    adminAddress: "Jenkins as Code"
+    url: "http://{{ jenkins_host_name }}/"
+  mailer:
+    charset: "UTF-8"
+    useSsl: false
+    useTls: false
+  mavenModuleSet:
+    localRepository: "default"
+  notifyBitbucket:
+    considerUnstableAsSuccess: false
+    disableInprogressNotification: false
+    ignoreUnverifiedSsl: false
+    includeBuildNumberInKey: false
+    prependParentProjectKey: false
+  pollSCM:
+    pollingThreadCount: 10
+  serverConfiguration:
+    serverInstances:
+    - configID: ""
+      hosting: SERVER
+  upstream:
+    globalUpstreamFilterStrategy: UseOldest
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
+  maven:
+    installations:
+    - home: "/opt/maven"
+      name: "sys_installed"
+    - name: "default"
+      properties:
+      - installSource:
+          installers:
+          - maven:
+              id: "3.8.6"
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"

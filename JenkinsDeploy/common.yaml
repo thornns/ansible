@@ -1,0 +1,38 @@
+---
+- name: Update the system
+  yum:
+    name: '*'
+    state: latest
+    exclude: kernel*
+
+- name: Install Docker dependencies
+  yum:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - docker-python
+      - unzip
+    state: latest
+
+- name: Add Docker repo
+  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: Install Docker CE
+  yum:
+    name: docker-ce
+    state: latest
+
+- name: Enable and start Docker service
+  service:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Create folder to build jenkins image.
+  file:
+    path: /root/jenkins_build
+    state: directory
+    owner: root
+    group: root
+    mode: 0644

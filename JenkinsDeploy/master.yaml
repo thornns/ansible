@@ -1,0 +1,167 @@
+---
+- hosts: master
+  remote_user: centos
+  become: true
+  become_user: root
+  vars:
+    - tag: "v1"
+    - maven_version: "3.6.3"
+  tasks:
+  - include_tasks: common.yml
+
+  - name: Create /dev/vdb1 if not exist
+    parted:
+      device: /dev/vdb
+      number: 1
+      state: present
+    register: vdb1_created
+
+  - name: Format /dev/vdb1 if not formated
+    filesystem:
+      dev: /dev/vdb1
+      fstype: xfs
+    when: vdb1_created.changed
+
+  - name: Create /jenkins/ folder
+    file:
+      path: /jenkins
+      state: directory
+      owner: centos
+      group: centos
+      mode: 0775
+
+  - name: Mount /dev/vdb1 in /jenkins
+    mount:
+      path: /jenkins
+      src: /dev/vdb1
+      state: mounted
+      fstype: xfs
+
+  - name: Change mount point owner and perms
+    file:
+      path: /jenkins
+      owner: centos
+      group: centos
+      mode: 0775
+
+  - name: Copy data folder to /jenkins
+    copy:
+      src: files/data/
+      dest: /jenkins/
+      owner: centos
+      group: centos
+  
+  # Manage Jenkins -> Configuration as Code -> /var/jenkins_home/jenkins_as_code.yaml -> Apply new configuration
+  - name: Copy Jenkins as Code template
+    template:
+      src: files/jenkins_as_code.yaml.j2
+      dest: /jenkins/jenkins_as_code.yaml
+      owner: centos
+      group: centos
+      mode: 0755
+
+  - name: Set Private Key permissions
+    file:
+      path: /jenkins/.ssh/id_rsa
+      owner: centos
+      group: centos
+      mode: 0600
+
+  - name: Copy files to build jenkins docker image
+    copy:
+      src: "{{ item }}"
+      dest: /root/jenkins_build
+      owner: root
+      group: root
+      mode: 0644
+    with_items:
+      - Dockerfile
+
+  - name: Stop old Jenkins container
+    docker_container:
+      name: jenkins
+      state: stopped
+    ignore_errors: yes
+
+  - name: Remove old Jenkins container
+    docker_container:
+      name: jenkins
+      state: absent
+
+  - name: Pull Source Jenkins Image
+    docker_image:
+      name: jenkins/jenkins:2.375.2-lts
+      source: pull
+
+  - name: Build Custom Jenkins Image
+    docker_image:
+      name: jenkins
+      tag: "{{ tag }}"
+      source: build
+      build:
+        path: /root/jenkins_build
+        pull: yes
+      state: present
+
+  - name: Run jenkins container
+    docker_container:
+      name: jenkins
+      image: jenkins:{{ tag }}
+      state: started
+      ports:
+        - "80:8080"
+        - "50000:50000"
+      volumes:
+        - "/jenkins:/var/jenkins_home"
+
+  - name: Wait for Jenkins goes up
+    wait_for:
+      port: 80
+      delay: 30
+
+  - name: Remove initial password lockfile
+    file:
+      path: /jenkins/secrets/initialAdminPassword
+      state: absent
+
+  - name: Retrieve jenkins admin user directory
+    find:
+      paths: /jenkins/users
+      patterns: 'admin_*'
+      file_type: directory
+    register: admin_file_name
+
+  - name: Reset admin password to install
+    lineinfile:
+      path: '{{ admin_file_name.files.0.path }}/config.xml'
+      regexp: '<passwordHash>'
+      line: '      <passwordHash>#jbcrypt:$2a$10$hWbMDOe5PieN1aXZQt6moOdUKiNhjYCi6WHpqDHZ7vIl9NY6MBGBu</passwordHash>'
+    register: password
+
+  - name: Restart Jenkins container
+    docker_container:
+      name: jenkins
+      state: started
+      restart: yes
+    when: password.changed
+
+  - name: Wait for Jenkins goes up after restarting
+    wait_for:
+      port: 80
+      delay: 5
+
+  - name: Download jnlpJars/jenkins-cli.jar
+    get_url:
+      url: "http://localhost/jnlpJars/jenkins-cli.jar"
+      dest: "/jenkins/war/WEB-INF/jenkins-cli.jar"
+      force: yes
+      timeout: 60
+    retries: 10
+    delay: 5
+    register: result
+    until: result is succeeded
+
+  - name: Create slaves config on master
+    shell: docker exec -t jenkins sh -c "sh /var/jenkins_home/create-node.sh {{ item }}"
+    with_items: "{{ my_envs }}"
+    ignore_errors: yes

@@ -1,0 +1,11 @@
+[all]
+[master]
+XXXXX
+
+[master:vars]
+my_envs='["dev", "test", "production"]'
+
+[slaves]
+XXXXX slave_env=dev
+XXXXX slave_env=test
+XXXXX slave_env=production

@@ -1,0 +1,69 @@
+---
+- hosts: slaves
+  remote_user: centos
+  become: true
+  become_user: root
+  vars:
+    - tag: "v1"
+  tasks:
+  - include_tasks: common.yml
+
+  - name: Copy files to build jenkins docker image
+    copy:
+      src: "{{ item }}"
+      dest: /root/jenkins_build
+      owner: root
+      group: root
+      mode: 0644
+    with_items:
+      - slaves/Dockerfile
+
+  - name: Pull jenkins slave image
+    docker_image:
+      name: jenkins/jnlp-slave
+      source: pull
+      force_source: true
+
+  - name: Remove Custom Jenkins Slave Image
+    docker_image:
+      name: jenkins_slave
+      tag: "{{ tag }}"
+      state: absent
+      force_absent: true
+
+  - name: Create jenkins slave image
+    docker_image:
+      name: jenkins_slave
+      source: build
+      build:
+        path: /root/jenkins_build
+      tag: "{{ tag }}"
+
+  - name: Stop old Jenkins container
+    docker_container:
+      name: jenkins_slave
+      state: stopped
+    ignore_errors: yes
+
+  - name: Remove old Jenkins container
+    docker_container:
+      name: jenkins_slave
+      state: absent
+
+  # REGEX changed due to new versions of Jenkins responding differently
+  - name: Get Jenkins secret to register slave
+    shell: curl -L -s -u admin:install -H `curl -s -u "admin:install" 'http://{{ jenkins_host_name }}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'` http://{{ jenkins_host_name }}/computer/slave.{{ slave_env }}/slave-agent.jnlp | sed 's/.*<jnlp><application-desc><argument>\([a-z0-9]*\).*/\1/'
+    register: jenkins_secret
+    args:
+      warn: false
+
+  - debug:
+      msg: "{{ jenkins_secret.stdout }}"
+
+  - name: Run jenkins slave container
+    docker_container:
+      name: jenkins_slave
+      image: jenkins_slave:{{ tag }}
+      state: started
+      restart_policy: always
+      command: "-url http://{{ jenkins_host_name }} {{ jenkins_secret.stdout }} slave.{{ slave_env }}"

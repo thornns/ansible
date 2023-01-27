@@ -1,0 +1,2 @@
+jenkins_host_name: "{{ groups['master'][0] }}"
+slave_env: "{{ deploy_env }}"
