@@ -1,0 +1,41 @@
+    - name: Bdebug dos pacotes requeridos
+      debug:
+        msg: "'php{{ php_version }}-fpm', 'php{{ php_version }}-mysql'"
+
+    - name: Instalar Pacotes Requeridos
+      apt:
+        name: [ 'aptitude', 'nginx', "php{{ php_version }}-fpm", "php{{ php_version }}-mysql" ]
+        state: latest
+        update_cache: yes
+
+    - name: debug dos plugins requeridos
+      debug:
+        msg: '"php{{ php_version }}-curl", "php{{ php_version }}-gd", "php{{ php_version }}-mbstring", "php{{ php_version }}-xml", "php{{ php_version }}-xmlrpc", "php{{ php_version }}-soap", "php{{ php_version }}-intl", "php{{ php_version }}-zip"'
+
+    - name: Plugins PHP Requeridos
+      apt:
+        name: [ "php{{ php_version }}-curl", "php{{ php_version }}-gd", "php{{ php_version }}-mbstring", "php{{ php_version }}-xml", "php{{ php_version }}-xmlrpc", "php{{ php_version }}-soap", "php{{ php_version }}-intl", "php{{ php_version }}-zip" ]
+        state: latest
+
+    - name: Permitir HTTP na porta {{ http_port }}
+      ufw:
+        rule: allow
+        port: "{{ http_port }}"
+        proto: tcp
+
+    - name: Configurar Template
+      template:
+        src: "nginx.conf.j2"
+        dest: "{{ nginx_sites_available }}/{{ http_conf }}"
+
+    - name: Habilitar site
+      file:
+        src: "{{ nginx_sites_available }}/{{ http_conf }}"
+        dest: "{{ nginx_sites_enabled }}/{{ http_conf }}"
+        state: link
+    
+    - name: Remover "default" site
+      file:
+        path: "{{ nginx_sites_enabled }}/default"
+        state: absent
+      notify: Restart Nginx

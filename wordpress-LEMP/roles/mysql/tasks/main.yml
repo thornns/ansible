@@ -1,0 +1,30 @@
+    - name: Instalar Pacotes Requeridos
+      apt:
+        name: [ 'aptitude', 'mysql-server', 'python3-pymysql' ]
+        state: latest
+        update_cache: yes
+
+    - name: Disponibilizar o MySQL remotamente
+      ini_file:
+        dest: "{{ mysql_root_dir }}/my.cnf"
+        section: mysqld
+        option: "bind-address"
+        value: "{{ mysql_db_ip }}"
+      notify: Restart MySQL
+
+    - name: Remover a base de teste do MySQL
+      mysql_db: 
+        name: test 
+        state: absent
+        login_user: "{{ ansible_become_user }}"
+        login_password: "{{ mysql_root_password }}"
+        login_unix_socket: "{{ mysql_unix_socket }}"
+
+    - name: Remover contas anônimas no MySQL
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_user: "{{ ansible_become_user }}"
+        login_password: "{{ mysql_root_password }}"
+        login_unix_socket: "{{ mysql_unix_socket }}"

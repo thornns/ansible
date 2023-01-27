@@ -1,0 +1,18 @@
+mysql_root_password: "@Rbn876rx"
+mysql_db: "wordpress_db"
+mysql_user: "wordpress"
+mysql_password: "password"
+mysql_root_dir: "/etc/mysql"
+http_host: "wordpress_ansible.com"
+http_conf: "{{ http_host }}.conf"
+http_port: "80"
+http_dir: "/var/www/{{ http_host }}"
+nginx_sites_available: "/etc/nginx/sites-available"
+nginx_sites_enabled: "/etc/nginx/sites-enabled"
+ansible_become_method: sudo
+ansible_become_user: root
+ansible_become_password: '@Rbn876rx'
+mysql_db_ip: 192.168.56.101
+wordpress_download: "https://br.wordpress.org/latest-pt_BR.tar.gz"
+php_version: 7.4
+mysql_unix_socket: "/var/run/mysqld/mysqld.sock"

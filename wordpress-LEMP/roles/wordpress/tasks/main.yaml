@@ -1,0 +1,51 @@
+    - name: Criar o Banco do Wordpress no MySQL
+      mysql_db:
+        name: "{{ mysql_db }}"
+        login_user: "{{ ansible_become_user }}"
+        login_password: "{{ mysql_root_password }}"
+        state: present
+        login_unix_socket: "{{ mysql_unix_socket }}"
+
+    - name: Criar um usuário para o Wordpress no MySQL
+      mysql_user:
+        name: "{{ mysql_user }}"
+        password: "{{ mysql_password }}"
+        priv: "{{ mysql_db }}.*:ALL"
+        host: '{{ item }}'
+        state: present
+        login_user: "{{ ansible_become_user }}"
+        login_password: "{{ mysql_root_password }}"
+        login_unix_socket: "{{ mysql_unix_socket }}"
+      with_items:
+        - 'localhost'
+        - '127.0.0.1'
+        - '{{ mysql_db_ip }}'
+
+    - name: Criar document root
+      file:
+        path: "{{ http_dir }}"
+        state: directory
+        owner: "{{ ansible_become_user }}"
+        group: "{{ ansible_become_user }}"
+        mode: 0755
+
+    - name: Baixar o Wordpress
+      unarchive:
+        src: "{{ wordpress_download }}"
+        dest: "{{ http_dir }}"
+        remote_src: yes
+        creates: "{{ http_dir }}/wordpress"
+    
+    - name: Set ownership
+      file:
+        path: "{{ http_dir }}"
+        state: directory
+        recurse: yes
+        owner: "{{ ansible_become_user }}"
+        group: "{{ ansible_become_user }}"
+        mode: 0755
+    
+    - name: Set up wp-config
+      template:
+        src: "wp-config.php.j2"
+        dest: "{{ http_dir }}/wordpress/wp-config.php"

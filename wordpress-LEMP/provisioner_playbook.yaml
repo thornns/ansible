@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  connection: local
+
+  become: yes
+
+  roles:
+    - mysql
+    - nginx
+    - wordpress
+...
